@@ -1,15 +1,11 @@
-"""
-Unit tests for the manifold of matrices.
-"""
-
-import tests.helper as helper
+"""Unit tests for the manifold of matrices."""
 
 import geomstats.backend as gs
 import geomstats.tests
 from geomstats.geometry.matrices import Matrices
 
 
-class TestMatricesMethods(geomstats.tests.TestCase):
+class TestMatrices(geomstats.tests.TestCase):
     def setUp(self):
         gs.random.seed(1234)
 
@@ -116,14 +112,14 @@ class TestMatricesMethods(geomstats.tests.TestCase):
     def test_make_symmetric(self):
         sym_mat = gs.array([[1., 2.],
                             [2., 1.]])
-        result = self.space.make_symmetric(sym_mat)
+        result = self.space.to_symmetric(sym_mat)
         expected = sym_mat
         self.assertAllClose(result, expected)
 
         mat = gs.array([[1., 2., 3.],
                         [0., 0., 0.],
                         [3., 1., 1.]])
-        result = self.space.make_symmetric(mat)
+        result = self.space.to_symmetric(mat)
         expected = gs.array([[1., 1., 3.],
                              [1., 0., 0.5],
                              [3., 0.5, 1.]])
@@ -132,7 +128,7 @@ class TestMatricesMethods(geomstats.tests.TestCase):
         mat = gs.array([[1e100, 1e-100, 1e100],
                         [1e100, 1e-100, 1e100],
                         [1e-100, 1e-100, 1e100]])
-        result = self.space.make_symmetric(mat)
+        result = self.space.to_symmetric(mat)
 
         res = 0.5 * (1e100 + 1e-100)
 
@@ -149,7 +145,7 @@ class TestMatricesMethods(geomstats.tests.TestCase):
             [[5., 6.],
              [4., 9.]]])
 
-        sym_points = self.space.make_symmetric(points)
+        sym_points = self.space.to_symmetric(points)
         result = gs.all(self.space.is_symmetric(sym_points))
         expected = True
         self.assertAllClose(result, expected)
@@ -179,7 +175,6 @@ class TestMatricesMethods(geomstats.tests.TestCase):
             gs.matmul(
                 gs.transpose(tangent_vector_1),
                 tangent_vector_2))
-        expected = helper.to_scalar(expected)
 
         self.assertAllClose(result, expected)
 

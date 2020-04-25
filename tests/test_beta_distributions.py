@@ -8,17 +8,18 @@ from geomstats.geometry.beta_distributions import BetaDistributions
 from geomstats.geometry.beta_distributions import BetaMetric
 
 
-class TestBetaMethods(geomstats.tests.TestCase):
+class TestBetaDistributions(geomstats.tests.TestCase):
     def setUp(self):
         warnings.simplefilter('ignore', category=UserWarning)
         self.beta = BetaDistributions()
         self.metric = BetaMetric()
         self.n_samples = 10
-        self.dimension = self.beta.dimension
+        self.dim = self.beta.dim
 
     @geomstats.tests.np_and_pytorch_only
     def test_random_uniform_and_belongs(self):
-        """
+        """Test random_uniform and belongs.
+
         Test that the random uniform method samples
         on the beta distribution space.
         """
@@ -31,15 +32,17 @@ class TestBetaMethods(geomstats.tests.TestCase):
 
     @geomstats.tests.np_and_pytorch_only
     def test_random_uniform(self):
-        """
+        """Test random_uniform.
+
         Test that the random uniform method samples points of the right shape
         """
         point = self.beta.random_uniform(self.n_samples)
-        self.assertAllClose(gs.shape(point), (self.n_samples, self.dimension))
+        self.assertAllClose(gs.shape(point), (self.n_samples, self.dim))
 
     @geomstats.tests.np_only
     def test_sample(self):
-        """
+        """Test samples.
+
         Test that the sample method samples variates from beta distributions
         with the specified parameters, using the law of large numbers
         """
@@ -54,7 +57,8 @@ class TestBetaMethods(geomstats.tests.TestCase):
 
     @geomstats.tests.np_only
     def test_maximum_likelihood_fit(self):
-        """
+        """Test maximum likelihood.
+
         Test that the maximum likelihood fit method recovers
         parameters of beta distribution.
         """
@@ -83,7 +87,8 @@ class TestBetaMethods(geomstats.tests.TestCase):
 
     @geomstats.tests.np_only
     def test_log_and_exp(self):
-        """
+        """Test Log and Exp.
+
         Test that the Riemannian exponential
         and the Riemannian logarithm are inverse.
 
@@ -99,7 +104,8 @@ class TestBetaMethods(geomstats.tests.TestCase):
         self.assertAllClose(result, expected, rtol=1e-2)
 
     def test_christoffels_vectorization(self):
-        """
+        """Test Christoffel synbols.
+
         Check vectorization of Christoffel symbols in
         spherical coordinates on the 2-sphere.
         """
@@ -107,5 +113,5 @@ class TestBetaMethods(geomstats.tests.TestCase):
         christoffel = self.metric.christoffels(points)
         result = christoffel.shape
         expected = gs.array(
-            [self.n_samples, self.dimension, self.dimension, self.dimension])
+            [self.n_samples, self.dim, self.dim, self.dim])
         self.assertAllClose(result, expected)

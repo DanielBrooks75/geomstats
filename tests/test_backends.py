@@ -1,5 +1,4 @@
-"""
-Unit tests for backends.
+"""Unit tests for backends.
 
 The functions are tested in order to match numpy's results and API.
 In exceptional cases, numpy's results or API may not be followed.
@@ -21,6 +20,30 @@ class TestBackends(geomstats.tests.TestCase):
 
         self.so3_group = SpecialOrthogonal(n=3)
         self.n_samples = 2
+
+    def test_array(self):
+        gs_mat = gs.array(1.5)
+        np_mat = _np.array(1.5)
+        self.assertAllCloseToNp(gs_mat, np_mat)
+
+        gs_mat = gs.array([gs.ones(3), gs.ones(3)])
+        np_mat = _np.array([_np.ones(3), _np.ones(3)])
+        self.assertAllCloseToNp(gs_mat, np_mat)
+
+        gs_mat = gs.array([gs.ones(3), gs.ones(3)], dtype=gs.float64)
+        np_mat = _np.array([_np.ones(3), _np.ones(3)], dtype=_np.float64)
+        self.assertTrue(gs_mat.dtype == gs.float64)
+        self.assertAllCloseToNp(gs_mat, np_mat)
+
+        gs_mat = gs.array([[gs.ones(3)], [gs.ones(3)]], dtype=gs.uint8)
+        np_mat = _np.array([[_np.ones(3)], [_np.ones(3)]], dtype=_np.uint8)
+        self.assertTrue(gs_mat.dtype == gs.uint8)
+        self.assertAllCloseToNp(gs_mat, np_mat)
+
+        gs_mat = gs.array([gs.ones(3), [0, 0, 0]], dtype=gs.int32)
+        np_mat = _np.array([_np.ones(3), [0, 0, 0]], dtype=_np.int32)
+        self.assertTrue(gs_mat.dtype == gs.int32)
+        self.assertAllCloseToNp(gs_mat, np_mat)
 
     def test_matmul(self):
         mat_a = [[2., 0., 0.],
@@ -141,7 +164,6 @@ class TestBackends(geomstats.tests.TestCase):
     @geomstats.tests.np_and_tf_only
     def test_expm_and_logm_vectorization_random_rotation(self):
         point = self.so3_group.random_uniform(self.n_samples)
-        point = self.so3_group.matrix_from_rotation_vector(point)
 
         result = gs.linalg.expm(gs.linalg.logm(point))
         expected = point
@@ -201,11 +223,6 @@ class TestBackends(geomstats.tests.TestCase):
 
         self.assertAllClose(result, expected)
 
-    @geomstats.tests.pytorch_only
-    def test_sampling_choice(self):
-        res = gs.random.choice(10, (5, 1, 3))
-        self.assertAllClose(res.shape, [5, 1, 3])
-
     @geomstats.tests.tf_only
     def test_vstack(self):
         import tensorflow as tf
@@ -218,13 +235,6 @@ class TestBackends(geomstats.tests.TestCase):
             [4., 5., 6.],
             [7., 8., 9.]])
         self.assertAllClose(result, expected)
-
-    @geomstats.tests.tf_only
-    def test_tensor_addition(self):
-        tensor_1 = gs.ones((1, 1))
-        tensor_2 = gs.ones((0, 1))
-
-        tensor_1 + tensor_2
 
     @geomstats.tests.pytorch_only
     def test_cumsum(self):
@@ -271,3 +281,317 @@ class TestBackends(geomstats.tests.TestCase):
         gs_result = gs.einsum('...i,...i->...', array_1, array_2)
 
         self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array_1 = _np.array([5])
+        np_array_2 = _np.array([[1, 2, 3]])
+        array_1 = gs.array([5])
+        array_2 = gs.array([[1, 2, 3]])
+
+        np_result = _np.einsum('...,...i->...i', np_array_1, np_array_2)
+        gs_result = gs.einsum('...,...i->...i', array_1, array_2)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array_1 = _np.array(5)
+        np_array_2 = _np.array([[1, 2, 3]])
+        array_1 = gs.array(5)
+        array_2 = gs.array([[1, 2, 3]])
+
+        np_result = _np.einsum('...,...i->...i', np_array_1, np_array_2)
+        gs_result = gs.einsum('...,...i->...i', array_1, array_2)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array_1 = _np.array([5])
+        np_array_2 = _np.array([1, 2, 3])
+        array_1 = gs.array([5])
+        array_2 = gs.array([1, 2, 3])
+
+        np_result = _np.einsum('...,...i->...i', np_array_1, np_array_2)
+        gs_result = gs.einsum('...,...i->...i', array_1, array_2)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array_1 = _np.array(5)
+        np_array_2 = _np.array([1, 2, 3])
+        array_1 = gs.array(5)
+        array_2 = gs.array([1, 2, 3])
+
+        np_result = _np.einsum('...,...i->...i', np_array_1, np_array_2)
+        gs_result = gs.einsum('...,...i->...i', array_1, array_2)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+    def test_assignment_with_matrices(self):
+        np_array = _np.zeros((2, 3, 3))
+        gs_array = gs.zeros((2, 3, 3))
+
+        np_array[:, 0, 1] = 44.
+
+        gs_array = gs.assignment(
+            gs_array, 44., (0, 1), axis=0)
+
+        self.assertAllCloseToNp(gs_array, np_array)
+
+    def test_assignment_with_booleans_single_index(self):
+        np_array = _np.array([[2., 5.]])
+        gs_array = gs.array([[2., 5.]])
+        np_mask = _np.array([True])
+        gs_mask = gs.array([True])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * _np.ones_like(np_array[~np_mask])
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs.ones_like(gs_array[~gs_mask]), ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([[2., 5.]])
+        gs_array = gs.array([[2., 5.]])
+        np_mask = _np.array([True])
+        gs_mask = gs.array([True])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * np_array[~np_mask]
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs_array[~gs_mask], ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([[2., 5.]])
+        gs_array = gs.array([[2., 5.]])
+        np_mask = _np.array([False])
+        gs_mask = gs.array([False])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * _np.ones_like(np_array[~np_mask])
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs.ones_like(gs_array[~gs_mask]), ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([[2., 5.]])
+        gs_array = gs.array([[2., 5.]])
+        np_mask = _np.array([False])
+        gs_mask = gs.array([False])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * np_array[~np_mask]
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs_array[~gs_mask], ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+    def test_assignment_with_booleans_many_indices(self):
+        np_array = _np.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        gs_array = gs.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+
+        np_mask = _np.array([True, False, True])
+        gs_mask = gs.array([True, False, True])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * _np.ones_like(np_array[~np_mask])
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs.ones_like(gs_array[~gs_mask]), ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        gs_array = gs.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+
+        np_mask = _np.array([False, True, True])
+        gs_mask = gs.array([False, True, True])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * _np.ones_like(np_array[~np_mask])
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs.ones_like(gs_array[~gs_mask]), ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        gs_array = gs.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        np_mask = _np.array([True, True, True])
+        gs_mask = gs.array([True, True, True])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * _np.ones_like(np_array[~np_mask])
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs.ones_like(gs_array[~gs_mask]), ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        gs_array = gs.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        np_mask = _np.array([True, True, True])
+        gs_mask = gs.array([True, True, True])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * np_array[~np_mask]
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs_array[~gs_mask], ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+        np_array = _np.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        gs_array = gs.array([
+            [22., 55.],
+            [33., 88.],
+            [77., 99.]])
+        np_mask = _np.array([False, False, False])
+        gs_mask = gs.array([False, False, False])
+
+        np_array[np_mask] = _np.zeros_like(np_array[np_mask])
+        np_array[~np_mask] = 4 * np_array[~np_mask]
+        np_result = np_array
+
+        values_mask = gs.zeros_like(gs_array[gs_mask])
+        gs_result = gs.assignment(
+            gs_array, values_mask, gs_mask)
+        gs_result = gs.assignment(
+            gs_result, 4 * gs_array[~gs_mask], ~gs_mask)
+        self.assertAllCloseToNp(gs_result, np_result)
+
+    def test_assignment(self):
+        np_array_1 = _np.ones(3)
+        gs_array_1 = gs.ones_like(gs.array(np_array_1))
+
+        np_array_1[2] = 1.5
+        gs_result = gs.assignment(gs_array_1, 1.5, 2)
+        self.assertAllCloseToNp(gs_result, np_array_1)
+
+        np_array_1_list = _np.ones(3)
+        gs_array_1_list = gs.ones_like(gs.array(np_array_1_list))
+
+        indices = [1, 2]
+        np_array_1_list[indices] = 1.5
+        gs_result = gs.assignment(gs_array_1_list, 1.5, indices)
+        self.assertAllCloseToNp(gs_result, np_array_1_list)
+
+        np_array_2 = _np.zeros((3, 2))
+        gs_array_2 = gs.zeros_like(gs.array(np_array_2))
+
+        np_array_2[0, :] = 1
+        gs_result = gs.assignment(gs_array_2, 1, 0, axis=1)
+        self.assertAllCloseToNp(gs_result, np_array_2)
+
+        np_array_3 = _np.zeros((3, 3))
+        gs_array_3 = gs.zeros_like(gs.array(np_array_3))
+
+        np_array_3[0, 1] = 1
+        gs_result = gs.assignment(gs_array_3, 1, (0, 1))
+        self.assertAllCloseToNp(gs_result, np_array_3)
+
+        np_array_4 = _np.zeros((3, 3, 2))
+        gs_array_4 = gs.zeros_like(gs.array(np_array_4))
+
+        np_array_4[0, :, 1] = 1
+        gs_result = gs.assignment(gs_array_4, 1, (0, 1), axis=1)
+        self.assertAllCloseToNp(gs_result, np_array_4)
+
+        np_array_4_list = _np.zeros((3, 3, 2))
+        gs_array_4_list = gs.zeros_like(gs.array(np_array_4_list))
+
+        np_array_4_list[(0, 1), :, (1, 1)] = 1
+        gs_result = gs.assignment(gs_array_4_list, 1, [(0, 1), (1, 1)], axis=1)
+        self.assertAllCloseToNp(gs_result, np_array_4_list)
+
+    def test_assignment_by_sum(self):
+        np_array_1 = _np.ones(3)
+        gs_array_1 = gs.ones_like(gs.array(np_array_1))
+
+        np_array_1[2] += 1.5
+        gs_result = gs.assignment_by_sum(gs_array_1, 1.5, 2)
+        self.assertAllCloseToNp(gs_result, np_array_1)
+
+        np_array_1_list = _np.ones(3)
+        gs_array_1_list = gs.ones_like(gs.array(np_array_1_list))
+
+        indices = [1, 2]
+        np_array_1_list[indices] += 1.5
+        gs_result = gs.assignment_by_sum(gs_array_1_list, 1.5, indices)
+        self.assertAllCloseToNp(gs_result, np_array_1_list)
+
+        np_array_2 = _np.zeros((3, 2))
+        gs_array_2 = gs.zeros_like(gs.array(np_array_2))
+
+        np_array_2[0, :] += 1
+        gs_result = gs.assignment_by_sum(gs_array_2, 1, 0, axis=1)
+        self.assertAllCloseToNp(gs_result, np_array_2)
+
+        np_array_3 = _np.zeros((3, 3))
+        gs_array_3 = gs.zeros_like(gs.array(np_array_3))
+
+        np_array_3[0, 1] += 1
+        gs_result = gs.assignment_by_sum(gs_array_3, 1, (0, 1))
+        self.assertAllCloseToNp(gs_result, np_array_3)
+
+        np_array_4 = _np.zeros((3, 3, 2))
+        gs_array_4 = gs.zeros_like(gs.array(np_array_4))
+
+        np_array_4[0, :, 1] += 1
+        gs_result = gs.assignment_by_sum(gs_array_4, 1, (0, 1), axis=1)
+        self.assertAllCloseToNp(gs_result, np_array_4)
+
+        np_array_4_list = _np.zeros((3, 3, 2))
+        gs_array_4_list = gs.zeros_like(gs.array(np_array_4_list))
+
+        np_array_4_list[(0, 1), :, (1, 1)] += 1
+        gs_result = gs.assignment_by_sum(
+            gs_array_4_list, 1, [(0, 1), (1, 1)], axis=1)
+        self.assertAllCloseToNp(gs_result, np_array_4_list)

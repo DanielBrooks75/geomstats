@@ -13,7 +13,7 @@ from geomstats.learning.knn import KNearestNeighborsClassifier
 
 def main():
     """Plot the result of a KNN classification on the sphere."""
-    sphere = Hypersphere(dimension=2)
+    sphere = Hypersphere(dim=2)
     sphere_distance = sphere.metric.dist
 
     n_labels = 2
@@ -59,7 +59,7 @@ def main():
     plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if os.environ['GEOMSTATS_BACKEND'] == 'tensorflow':
         logging.info('Examples with visualizations are only implemented '
                      'with numpy backend.\n'

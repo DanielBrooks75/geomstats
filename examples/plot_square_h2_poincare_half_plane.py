@@ -7,21 +7,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import geomstats.visualization as visualization
-from geomstats.geometry.hyperbolic import Hyperbolic
+from geomstats.geometry.hyperboloid import Hyperboloid
 
-H2 = Hyperbolic(dimension=2)
+H2 = Hyperboloid(dim=2)
 METRIC = H2.metric
 
 SQUARE_SIZE = 50
 
 
 def main():
+    """Plot a square on H2 with Poincare half-plane visualization."""
     top = SQUARE_SIZE / 2.0
     bot = - SQUARE_SIZE / 2.0
     left = - SQUARE_SIZE / 2.0
     right = SQUARE_SIZE / 2.0
     corners_int = [(bot, left), (bot, right), (top, right), (top, left)]
-    corners_ext = H2.from_coordinates(corners_int, "intrinsic")
+    corners_ext = H2.from_coordinates(corners_int, 'intrinsic')
     n_steps = 20
     ax = plt.gca()
     for i, src in enumerate(corners_ext):
@@ -43,7 +44,7 @@ def main():
     plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if os.environ['GEOMSTATS_BACKEND'] == 'tensorflow':
         logging.info('Examples with visualizations are only implemented '
                      'with numpy backend.\n'
