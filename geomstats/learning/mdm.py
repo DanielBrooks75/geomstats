@@ -1,7 +1,6 @@
 """The MDM classifier on manifolds."""
 
-import numpy
-
+import geomstats.backend as gs
 from geomstats.learning.frechet_mean import FrechetMean
 
 
@@ -27,7 +26,7 @@ class RiemannianMinimumDistanceToMeanClassifier():
             riemannian_metric,
             mean_method='default',
             verbose=0,
-            point_type='vector'):
+            point_type='matrix'):
         self.riemannian_metric = riemannian_metric
         self.point_type = point_type
 
@@ -51,11 +50,9 @@ class RiemannianMinimumDistanceToMeanClassifier():
         frechet_means = []
         for c in range(n_classes):
             data_class = self.split_data_in_classes(X, Y, c)
-            # data_class_vec=numpy.array(
-            # [sample_data.mat2vec(data_class[i]) for i in range(n_samples)])
-            # data_class_vec=data_class.reshape((-1,n*n))
-            frechet_means.append(mean_estimator.fit(data_class).estimate_[0])
-        self.G = numpy.array(frechet_means)
+            # frechet_means.append(mean_estimator.fit(data_class).estimate_[0])
+            frechet_means.append(mean_estimator.fit(data_class).estimate_)
+        self.G = gs.array(frechet_means)
         return
 
     def predict(self, X):
@@ -73,7 +70,7 @@ class RiemannianMinimumDistanceToMeanClassifier():
         """
         n_samples = X.shape[0]
         n_classes = self.G.shape[0]
-        Y = numpy.zeros((n_samples, n_classes))
+        Y = gs.zeros((n_samples, n_classes))
         for i in range(n_samples):
             c = self.riemannian_metric.closest_neighbor_index(X[i], self.G)
             Y[i, c] = 1
@@ -100,4 +97,4 @@ class RiemannianMinimumDistanceToMeanClassifier():
                   Labelled dataset,
                   where n_samples_in_class is the number of samples in class c
         """
-        return X[numpy.where(numpy.where(Y)[1] == c)]
+        return X[gs.where(gs.where(Y)[1] == c)]

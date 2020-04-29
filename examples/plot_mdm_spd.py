@@ -1,8 +1,13 @@
-import plot_mdm_spd_helper
+"""
+Illustration example for the MDM classification algorithm in dimension 2
+"""
+
 
 from geomstats.geometry.spd_matrices import SPDMatrices
 from geomstats.geometry.spd_matrices import SPDMetricAffine
 from geomstats.learning.mdm import RiemannianMinimumDistanceToMeanClassifier
+import geomstats.visualization as visualization
+import geomstats.datasets.sample_sdp_2d
 
 
 def main():
@@ -11,16 +16,16 @@ def main():
     n_classes = 3
 
     # generate toy dataset of 2D SPD matrices
-    dataset_generator = plot_mdm_spd_helper.DatasetSPD_2D(
+    dataset_generator = geomstats.datasets.sample_sdp_2d.DatasetSPD_2D(
         n_samples, n_features, n_classes)
     data, labels = dataset_generator.generate_sample_dataset()
 
     # plot dataset as ellipses
-    plot_helper = plot_mdm_spd_helper.PlotHelper()
+    ellipsis = visualization.Ellipsis()
     for i in range(n_samples):
         x = data[i]
         y = dataset_generator.data_helper.get_label_at_index(i, labels)
-        plot_helper.plot_ellipse(x, color=plot_helper.colors[y], alpha=.1)
+        ellipsis.draw(x, color=ellipsis.colors[y], alpha=.1)
 
     # define and fit MDM classifier to data
     metric = SPDMetricAffine(n=n_features)
@@ -30,15 +35,11 @@ def main():
 
     # plot Frechet means computed in the MDM
     for i in range(n_classes):
-        plot_helper.plot_ellipse(
+        ellipsis.draw(
             MDMEstimator.G[i],
-            color=plot_helper.colors_alt[i],
+            color=ellipsis.colors_alt[i],
             linewidth=5,
             label='Barycenter of class ' + str(i))
-
-    # data_vec=numpy.array(
-    # [sample_data.mat2vec(data[i]) for i in range(n_samples)])
-    # data_vec=numpy.reshape(data,(-1,n*n))
 
     # generate random test samples, and predict with MDM classifier
     data_test = SPDMatrices(n=n_features).random_uniform(n_samples=3)
@@ -46,12 +47,13 @@ def main():
 
     for i in range(data_test.shape[0]):
         c = list(predictions[i] == 1).index(True)
-        x_from, y_from = plot_helper.plot_ellipse(
-            data_test[i], color=plot_helper.colors[c], linewidth=5)
-        _, _, x_to, y_to = plot_helper.ellipse(MDMEstimator.G[c])
-        plot_helper.plot_arrow(x_from, y_from, x_to, y_to)
+        x_from, y_from = ellipsis.draw(
+            data_test[i], color=ellipsis.colors[c], linewidth=5)
+        _, _, x_to, y_to = ellipsis.compute_coordinates(MDMEstimator.G[c])
+        arrow=visualization.DataArrow(ellipsis.fig)
+        arrow.draw(x_from, y_from, x_to, y_to)
 
-    plot_helper.plot_final()
+    ellipsis.plot()
 
 
 if(__name__ == '__main__'):

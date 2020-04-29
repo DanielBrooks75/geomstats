@@ -9,6 +9,7 @@ from geomstats.geometry.general_linear import GeneralLinear
 from geomstats.geometry.matrices import Matrices
 from geomstats.geometry.riemannian_metric import RiemannianMetric
 from geomstats.geometry.symmetric_matrices import SymmetricMatrices
+from geomstats.geometry.special_orthogonal import SpecialOrthogonal
 
 EPSILON = 1e-6
 TOLERANCE = 1e-12
@@ -60,6 +61,16 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
             '...ij,...jk->...ik', tangent_vec, sqrt_base_point)
 
         return tangent_vec
+
+    def random_gaussian(self, mean, var, n_samples=1):
+        """
+        Define a Gaussian random sample of SPD matrices (definition is debatable).
+        """
+        n = self.n
+        size = (n_samples, n, n) if n_samples != 1 else (n, n)
+
+
+        return spd_mat
 
     @staticmethod
     @geomstats.vectorization.decorator(['else', 'matrix', 'matrix'])
