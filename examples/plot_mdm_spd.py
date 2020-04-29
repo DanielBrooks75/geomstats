@@ -14,7 +14,6 @@ def main():
     n_classes=3
 
     # generate toy dataset of 2D SPD matrices
-
     dataset_generator=helper_mdm_spd.DatasetSPD_2D(n_samples,n_features,n_classes)
     data,labels=dataset_generator.generate_sample_dataset()
 
