@@ -3,7 +3,7 @@
 import joblib
 
 import geomstats.backend as gs
-import geomstats.error
+import geomstats.errors
 import geomstats.vectorization
 from geomstats.geometry.manifold import Manifold
 from geomstats.geometry.product_riemannian_metric import \
@@ -18,12 +18,12 @@ class ProductManifold(Manifold):
     same dimension, but the list of manifolds needs to be provided.
 
     By default, a point is represented by an array of shape:
-    [n_samples, dim_1 + ... + dim_n_manifolds]
+    [..., dim_1 + ... + dim_n_manifolds]
     where n_manifolds is the number of manifolds in the product.
     This type of representation is called 'vector'.
 
     Alternatively, a point can be represented by an array of shape:
-    [n_samples, n_manifolds, dim] if the n_manifolds have same dimension dim.
+    [..., n_manifolds, dim] if the n_manifolds have same dimension dim.
     This type of representation is called `matrix`.
 
     Parameters
@@ -34,10 +34,10 @@ class ProductManifold(Manifold):
         Default representation of points.
     """
 
-    # FIXME(nguigs): This only works for 1d points
+    # FIXME (nguigs): This only works for 1d points
 
     def __init__(self, manifolds, default_point_type='vector', n_jobs=1):
-        geomstats.error.check_parameter_accepted_values(
+        geomstats.errors.check_parameter_accepted_values(
             default_point_type, 'default_point_type', ['vector', 'matrix'])
 
         self.dims = [manifold.dim for manifold in manifolds]
@@ -76,15 +76,14 @@ class ProductManifold(Manifold):
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, dim]
-                           or shape=[n_samples, dim_2, dim_2]
+        point : array-like, shape=[..., {dim, [dim_2, dim_2]}]
             Point.
         point_type : str, {'vector', 'matrix'}
             Representation of point.
 
         Returns
         -------
-        belongs : array-like, shape=[n_samples, 1]
+        belongs : array-like, shape=[..., 1]
             Array of booleans evaluating if the corresponding points
             belong to the manifold.
         """
@@ -112,21 +111,19 @@ class ProductManifold(Manifold):
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, dim]
-                           or shape=[n_samples, dim_2, dim_2]
+        point : array-like, shape=[..., {dim, [dim_2, dim_2]}]
             Point to be regularized.
         point_type : str, {'vector', 'matrix'}
             Representation of point.
 
         Returns
         -------
-        regularized_point : array-like, shape=[n_samples, dim]
-                            or shape=[n_samples, dim_2, dim_2]
+        regularized_point : array-like, shape=[..., {dim, [dim_2, dim_2]}]
             Point in the manifold's canonical representation.
         """
         if point_type is None:
             point_type = self.default_point_type
-        geomstats.error.check_parameter_accepted_values(
+        geomstats.errors.check_parameter_accepted_values(
             point_type, 'point_type', ['vector', 'matrix'])
 
         if point_type == 'vector':
@@ -153,12 +150,12 @@ class ProductManifold(Manifold):
 
         Returns
         -------
-        samples : array-like, shape=[n_samples, dim + 1]
+        samples : array-like, shape=[..., dim + 1]
             Points sampled on the hypersphere.
         """
         if point_type is None:
             point_type = self.default_point_type
-        geomstats.error.check_parameter_accepted_values(
+        geomstats.errors.check_parameter_accepted_values(
             point_type, 'point_type', ['vector', 'matrix'])
 
         if point_type == 'vector':

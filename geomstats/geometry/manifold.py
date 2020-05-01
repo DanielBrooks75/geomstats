@@ -4,7 +4,7 @@ In other words, a topological space that locally resembles
 Euclidean space near each point.
 """
 
-import geomstats.error
+import geomstats.errors
 
 
 ATOL = 1e-6
@@ -16,8 +16,8 @@ class Manifold:
     def __init__(
             self, dim, default_point_type='vector',
             default_coords_type='intrinsic'):
-        geomstats.error.check_integer(dim, 'dim')
-        geomstats.error.check_parameter_accepted_values(
+        geomstats.errors.check_integer(dim, 'dim')
+        geomstats.errors.check_parameter_accepted_values(
             default_point_type, 'default_point_type', ['vector', 'matrix'])
 
         self.dim = dim
@@ -29,12 +29,12 @@ class Manifold:
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, dim]
+        point : array-like, shape=[..., dim]
                  Input points.
 
         Returns
         -------
-        belongs : array-like, shape=[n_samples, 1]
+        belongs : array-like, shape=[...,]
         """
         raise NotImplementedError('belongs is not implemented.')
 
@@ -43,9 +43,9 @@ class Manifold:
 
         Parameters
         ----------
-        vector : array-like, shape=[n_samples, dim]
+        vector : array-like, shape=[..., dim]
             Vector.
-        base_point : array-like, shape=[n_samples, dim]
+        base_point : array-like, shape=[..., dim]
             Point on the manifold.
 
         Returns
@@ -61,14 +61,14 @@ class Manifold:
 
         Parameters
         ----------
-        vector : array-like, shape=[n_samples, dim]
+        vector : array-like, shape=[..., dim]
             Vector.
-        base_point : array-like, shape=[n_samples, dim]
+        base_point : array-like, shape=[..., dim]
             Point on the manifold.
 
         Returns
         -------
-        tangent_vec : array-like, shape=[n_samples, dim]
+        tangent_vec : array-like, shape=[..., dim]
             Tangent vector at base point.
         """
         raise NotImplementedError(
@@ -79,12 +79,12 @@ class Manifold:
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, dim]
+        point : array-like, shape=[..., dim]
                  Input points.
 
         Returns
         -------
-        regularized_point : array-like, shape=[n_samples, dim]
+        regularized_point : array-like, shape=[..., dim]
         """
         regularized_point = point
         return regularized_point

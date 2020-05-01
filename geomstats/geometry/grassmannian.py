@@ -1,7 +1,7 @@
 """Module exposing `Grassmannian` and `GrassmannianMetric` classes."""
 
 import geomstats.backend as gs
-import geomstats.error
+import geomstats.errors
 from geomstats.geometry.embedded_manifold import EmbeddedManifold
 from geomstats.geometry.euclidean import EuclideanMetric
 from geomstats.geometry.general_linear import GeneralLinear
@@ -23,8 +23,8 @@ class Grassmannian(EmbeddedManifold):
     """
 
     def __init__(self, n, k):
-        geomstats.error.check_integer(k, 'k')
-        geomstats.error.check_integer(n, 'n')
+        geomstats.errors.check_integer(k, 'k')
+        geomstats.errors.check_integer(n, 'n')
         if k > n:
             raise ValueError(
                 'k <= n is required: k-dimensional subspaces in n dimensions.')
@@ -51,7 +51,7 @@ class Grassmannian(EmbeddedManifold):
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, n, n]
+        point : array-like, shape=[..., n, n]
         tolerance : int
             default: TOLERANCE
 
@@ -71,8 +71,8 @@ class GrassmannianCanonicalMetric(RiemannianMetric):
     """
 
     def __init__(self, n, p):
-        geomstats.error.check_integer(p, 'p')
-        geomstats.error.check_integer(n, 'n')
+        geomstats.errors.check_integer(p, 'p')
+        geomstats.errors.check_integer(n, 'n')
         if p > n:
             raise ValueError('p <= n is required.')
 
@@ -90,14 +90,14 @@ class GrassmannianCanonicalMetric(RiemannianMetric):
 
         Parameters
         ----------
-        vector : array-like, shape=[n_samples, n, n]
+        vector : array-like, shape=[..., n, n]
             `vector` is skew-symmetric, in so(n).
-        point : array-like, shape=[n_samples, n, n]
+        point : array-like, shape=[..., n, n]
             `point` is a rank p projector of Gr(n, k).
 
         Returns
         -------
-        exp : array-like, shape=[n_samples, n, n]
+        exp : array-like, shape=[..., n, n]
         """
         expm = gs.linalg.expm
         mul = Matrices.mul
@@ -115,14 +115,14 @@ class GrassmannianCanonicalMetric(RiemannianMetric):
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, n, n]
+        point : array-like, shape=[..., n, n]
             Point in the Grassmannian.
-        base_point : array-like, shape=[n_samples, n, n]
+        base_point : array-like, shape=[..., n, n]
             Point in the Grassmannian.
 
         Returns
         -------
-        tangent_vec : array-like, shape=[n_samples, n, n]
+        tangent_vec : array-like, shape=[..., n, n]
             Tangent vector at `base_point`.
 
         References

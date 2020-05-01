@@ -23,7 +23,8 @@ class SymmetricMatrices(EmbeddedManifold):
 
     def belongs(self, mat, atol=TOLERANCE):
         """Check if mat belongs to the vector space of symmetric matrices."""
-        return self.embedding_manifold.is_symmetric(mat=mat, atol=atol)
+        check_shape = self.embedding_manifold.belongs(mat)
+        return gs.logical_and(check_shape, Matrices.is_symmetric(mat, atol))
 
     def get_basis(self):
         """Compute the basis of the vector space of symmetric matrices."""
@@ -62,11 +63,11 @@ class SymmetricMatrices(EmbeddedManifold):
         mat_dim = (gs.sqrt(8. * vec_dim + 1) - 1) / 2
         if mat_dim != int(mat_dim):
             raise ValueError('Invalid input dimension, it must be of the form'
-                             '(n_samples, n * (n - 1) / 2)')
+                             '(n_samples, n * (n + 1) / 2)')
         mat_dim = int(mat_dim)
-        mask = 2 * gs.ones((mat_dim, mat_dim)) - gs.eye(mat_dim)
-        indices = list(zip(*gs.triu_indices(3)))
         shape = (mat_dim, mat_dim)
+        mask = 2 * gs.ones(shape) - gs.eye(mat_dim)
+        indices = list(zip(*gs.triu_indices(mat_dim)))
         vec = gs.cast(vec, dtype)
         upper_triangular = gs.stack([
             gs.array_from_sparse(indices, data, shape) for data in vec])
@@ -81,12 +82,12 @@ class SymmetricMatrices(EmbeddedManifold):
 
         Parameters
         ----------
-        x : array_like, shape=[n_samples, n, n]
+        x : array_like, shape=[..., n, n]
             Symmetric matrix.
 
         Returns
         -------
-        exponential : array_like, shape=[n_samples, n, n]
+        exponential : array_like, shape=[..., n, n]
             Exponential of x.
         """
         return cls.apply_func_to_eigvals(x, gs.exp)
@@ -98,14 +99,14 @@ class SymmetricMatrices(EmbeddedManifold):
 
         Parameters
         ----------
-        x : array_like, shape=[n_samples, n, n]
+        x : array_like, shape=[..., n, n]
             Symmetric matrix with non-negative eigenvalues.
         power : float
             The power at which x will be raised.
 
         Returns
         -------
-        powerm : array_like, shape=[n_samples, n, n]
+        powerm : array_like, shape=[..., n, n]
             Matrix power of x.
         """
         def _power(eigvals):
@@ -119,14 +120,14 @@ class SymmetricMatrices(EmbeddedManifold):
 
         Parameters
         ----------
-        x : array_like, shape=[n_samples, n, n]
+        x : array_like, shape=[..., n, n]
             Symmetric matrix.
         function : callable
             Function to apply to eigenvalues.
 
         Returns
         -------
-        x : array_like, shape=[n_samples, n, n]
+        x : array_like, shape=[..., n, n]
             Symmetric matrix.
         """
         eigvals, eigvecs = gs.linalg.eigh(x)

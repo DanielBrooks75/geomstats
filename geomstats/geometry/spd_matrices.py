@@ -23,10 +23,9 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
             dim=int(n * (n + 1) / 2),
             embedding_manifold=GeneralLinear(n=n))
 
-    @staticmethod
-    def belongs(mat, atol=TOLERANCE):
+    def belongs(self, mat, atol=TOLERANCE):
         """Check if a matrix is symmetric and invertible."""
-        is_symmetric = GeneralLinear.is_symmetric(mat)
+        is_symmetric = super(SPDMatrices, self).belongs(mat, atol)
         eigvalues, _ = gs.linalg.eigh(mat)
         is_positive = gs.all(eigvalues > 0, axis=-1)
         belongs = gs.logical_and(is_symmetric, is_positive)
@@ -74,18 +73,18 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
         ----------
         power : float
             Power function to differentiate.
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        eigvectors : array-like, shape=[n_samples, n, n]
-        transp_eigvectors : array-like, shape=[n_samples, n, n]
-        numerator : array-like, shape=[n_samples, n, n]
-        denominator : array-like, shape=[n_samples, n, n]
-        temp_result : array-like, shape=[n_samples, n, n]
+        eigvectors : array-like, shape=[..., n, n]
+        transp_eigvectors : array-like, shape=[..., n, n]
+        numerator : array-like, shape=[..., n, n]
+        denominator : array-like, shape=[..., n, n]
+        temp_result : array-like, shape=[..., n, n]
         """
         n_tangent_vecs, _, _ = tangent_vec.shape
         n_base_points, _, n = base_point.shape
@@ -156,14 +155,14 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
         Parameters
         ----------
         power : int
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        differential_power : array-like, shape=[n_samples, n, n]
+        differential_power : array-like, shape=[..., n, n]
         """
         eigvectors, transp_eigvectors, numerator, denominator, temp_result =\
             cls.aux_differential_power(power, tangent_vec, base_point)
@@ -185,14 +184,14 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
         Parameters
         ----------
         power : int
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        inverse_differential_power : array-like, shape=[n_samples, n, n]
+        inverse_differential_power : array-like, shape=[..., n, n]
         """
         eigvectors, transp_eigvectors, numerator, denominator, temp_result =\
             cls.aux_differential_power(power, tangent_vec, base_point)
@@ -212,14 +211,14 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
 
         Parameters
         ----------
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        differential_log : array-like, shape=[n_samples, n, n]
+        differential_log : array-like, shape=[..., n, n]
         """
         eigvectors, transp_eigvectors, numerator, denominator, temp_result =\
             cls.aux_differential_power(0, tangent_vec, base_point)
@@ -240,14 +239,14 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
 
         Parameters
         ----------
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        inverse_differential_log : array-like, shape=[n_samples, n, n]
+        inverse_differential_log : array-like, shape=[..., n, n]
         """
         eigvectors, transp_eigvectors, numerator, denominator, temp_result =\
             cls.aux_differential_power(0, tangent_vec, base_point)
@@ -267,14 +266,14 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
 
         Parameters
         ----------
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        differential_exp : array-like, shape=[n_samples, n, n]
+        differential_exp : array-like, shape=[..., n, n]
         """
         eigvectors, transp_eigvectors, numerator, denominator, temp_result = \
             cls.aux_differential_power(math.inf, tangent_vec, base_point)
@@ -295,14 +294,14 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
 
         Parameters
         ----------
-        tangent_vec : array_like, shape=[n_samples, n, n]
-            Tangent vectors.
-        base_point : array_like, shape=[n_samples, n, n]
-            Base points.
+        tangent_vec : array_like, shape=[..., n, n]
+            Tangent vector.
+        base_point : array_like, shape=[..., n, n]
+            Base point.
 
         Returns
         -------
-        inverse_differential_exp : array-like, shape=[n_samples, n, n]
+        inverse_differential_exp : array-like, shape=[..., n, n]
         """
         eigvectors, transp_eigvectors, numerator, denominator, temp_result = \
             cls.aux_differential_power(math.inf, tangent_vec, base_point)
@@ -319,12 +318,12 @@ class SPDMatrices(SymmetricMatrices, EmbeddedManifold):
 
         Parameters
         ----------
-        x : array_like, shape=[n_samples, n, n]
+        x : array_like, shape=[..., n, n]
             Symmetric matrix.
 
         Returns
         -------
-        log : array_like, shape=[n_samples, n, n]
+        log : array_like, shape=[..., n, n]
             Logarithm of x.
         """
         return cls.apply_func_to_eigvals(x, gs.log, check_positive=True)
@@ -366,13 +365,13 @@ class SPDMetricAffine(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec_a : array-like, shape=[n_samples, n, n]
-        tangent_vec_b : array-like, shape=[n_samples, n, n]
-        inv_base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec_a : array-like, shape=[..., n, n]
+        tangent_vec_b : array-like, shape=[..., n, n]
+        inv_base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        inner_product : array-like, shape=[n_samples, n, n]
+        inner_product : array-like, shape=[..., n, n]
         """
         aux_a = gs.einsum(
             '...ij,...jk->...ik', inv_base_point, tangent_vec_a)
@@ -391,13 +390,13 @@ class SPDMetricAffine(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec_a : array-like, shape=[n_samples, n, n]
-        tangent_vec_b : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec_a : array-like, shape=[..., n, n]
+        tangent_vec_b : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        inner_product : array-like, shape=[n_samples, n, n]
+        inner_product : array-like, shape=[..., n, n]
         """
         power_affine = self.power_affine
         spd_space = self.space
@@ -428,7 +427,7 @@ class SPDMetricAffine(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec : array-like, shape=[n_samples, n, n]
+        tangent_vec : array-like, shape=[..., n, n]
         sqrt_base_point
         inv_sqrt_base_point
 
@@ -458,12 +457,12 @@ class SPDMetricAffine(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        exp : array-like, shape=[n_samples, n, n]
+        exp : array-like, shape=[..., n, n]
         """
         power_affine = self.power_affine
 
@@ -523,12 +522,12 @@ class SPDMetricAffine(RiemannianMetric):
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        point : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        log : array-like, shape=[n_samples, n, n]
+        log : array-like, shape=[..., n, n]
         """
         power_affine = self.power_affine
 
@@ -581,17 +580,17 @@ class SPDMetricAffine(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec_a : array-like, shape=[n_samples, dim + 1]
+        tangent_vec_a : array-like, shape=[..., dim + 1]
             Tangent vector at base point to be transported.
-        tangent_vec_b : array-like, shape=[n_samples, dim + 1]
+        tangent_vec_b : array-like, shape=[..., dim + 1]
             Tangent vector at base point, initial speed of the geodesic along
             which the parallel transport is computed.
-        base_point : array-like, shape=[n_samples, dim + 1]
+        base_point : array-like, shape=[..., dim + 1]
             point on the manifold of SPD matrices
 
         Returns
         -------
-        transported_tangent_vec: array-like, shape=[n_samples, dim + 1]
+        transported_tangent_vec: array-like, shape=[..., dim + 1]
             Transported tangent vector at exp_(base_point)(tangent_vec_b).
         """
         end_point = self.exp(tangent_vec_b, base_point)
@@ -629,9 +628,9 @@ class SPDMetricProcrustes(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec_a : array-like, shape=[n_samples, n, n]
-        tangent_vec_b : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec_a : array-like, shape=[..., n, n]
+        tangent_vec_b : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
@@ -666,9 +665,9 @@ class SPDMetricEuclidean(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec_a : array-like, shape=[n_samples, n, n]
-        tangent_vec_b : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec_a : array-like, shape=[..., n, n]
+        tangent_vec_b : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
@@ -705,12 +704,12 @@ class SPDMetricEuclidean(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        exp_domain : array-like, shape=[n_samples, 2]
+        exp_domain : array-like, shape=[..., 2]
         """
         invsqrt_base_point = gs.linalg.powerm(base_point, -.5)
 
@@ -749,9 +748,9 @@ class SPDMetricLogEuclidean(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec_a : array-like, shape=[n_samples, n, n]
-        tangent_vec_b : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec_a : array-like, shape=[..., n, n]
+        tangent_vec_b : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
@@ -779,12 +778,12 @@ class SPDMetricLogEuclidean(RiemannianMetric):
 
         Parameters
         ----------
-        tangent_vec : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        tangent_vec : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        exp : array-like, shape=[n_samples, n, n]
+        exp : array-like, shape=[..., n, n]
         """
         log_base_point = self.space.logm(base_point)
         dlog_tangent_vec = self.space.differential_log(tangent_vec, base_point)
@@ -801,12 +800,12 @@ class SPDMetricLogEuclidean(RiemannianMetric):
 
         Parameters
         ----------
-        point : array-like, shape=[n_samples, n, n]
-        base_point : array-like, shape=[n_samples, n, n]
+        point : array-like, shape=[..., n, n]
+        base_point : array-like, shape=[..., n, n]
 
         Returns
         -------
-        log : array-like, shape=[n_samples, n, n]
+        log : array-like, shape=[..., n, n]
         """
         log_base_point = SPDMatrices.logm(base_point)
         log_point = SPDMatrices.logm(point)
@@ -820,8 +819,8 @@ class SPDMetricLogEuclidean(RiemannianMetric):
 
         Parameters
         ----------
-        initial_point : array-like, shape=[n_samples, n, n]
-        initial_tangent_vec : array-like, shape=[n_samples, n, n]
+        initial_point : array-like, shape=[..., n, n]
+        initial_tangent_vec : array-like, shape=[..., n, n]
 
         Returns
         -------

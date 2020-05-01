@@ -6,7 +6,7 @@ import math
 from sklearn.base import BaseEstimator
 
 import geomstats.backend as gs
-import geomstats.error as error
+import geomstats.errors as error
 import geomstats.vectorization
 from geomstats.geometry.euclidean import EuclideanMetric
 from geomstats.geometry.matrices import MatricesMetric
@@ -69,7 +69,7 @@ def linear_mean(points, weights=None, point_type='vector'):
     mean : array-like, shape=[1, dim]
         Weighted linear mean of the points.
     """
-    # TODO(ninamiolane): Factorize this code to handle lists
+    # TODO (ninamiolane): Factorize this code to handle lists
     # in the whole codebase
     if isinstance(points, list):
         points = gs.stack(points, axis=0)
@@ -328,7 +328,7 @@ class FrechetMean(BaseEstimator):
         self : object
             Returns self.
         """
-        # TODO(nina): Profile this code to study performance,
+        # TODO (nina): Profile this code to study performance,
         # i.e. what to do with sq_dists_between_iterates.
 
         is_linear_metric = isinstance(
