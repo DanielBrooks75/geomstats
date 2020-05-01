@@ -4,6 +4,7 @@ Helper data classes for the MDM illustration example on SPD matrices
 
 import geomstats.backend as gs
 from geomstats.geometry.spd_matrices import SPDMatrices
+from geomstats.geometry.spd_matrices import EigenSummary
 from geomstats.geometry.special_orthogonal import SpecialOrthogonal
 
 
@@ -16,7 +17,7 @@ class DatasetSPD_2D():
         self.data_helper = DataHelper()
 
     def generate_sample_dataset(self):
-        X, Y = self.make_data()
+        X, Y = self.setup_data()
         X, Y = self.data_helper.shuffle(X, Y)
         return X, Y
 
@@ -38,27 +39,16 @@ class DatasetSPD_2D():
         c, s = gs.cos(angle), gs.sin(angle)
         return gs.array([[c, -s], [s, c]])
 
-    def make_data(self):
+    def setup_data(self):
 
-        spd=SPDMatrices(n=self.n_features)
-        so=SpecialOrthogonal(n=self.n_features)
-
-        # hyperparams
-        # get self.n_classes mean mean vectors
-        M = gs.random.uniform(-5, 5, (self.n_classes, self.n_features))
-        # get self.n_classes mean diagonal covariances
-        S = gs.random.uniform(0.1, 5., (self.n_classes, self.n_features))
-        if(self.n_features == 2):
-            # get self.n_classes mean rotations
-            # R = self.random_rotations(gs.eye(self.n_features), 1)
-            R = so.random_gaussian(gs.eye(self.n_features), 1, n_samples=self.n_samples)
-        var_mean = gs.eye(self.n_features) * 0.05  # class variance in mean
-        var_cov = gs.eye(self.n_features) * 0.05  # in covariance
-        if(self.n_features == 2):
-            var_rot = 0.01  # in rotation
+        mean_covariance_eigenvalues = gs.random.uniform(0.1, 5., (self.n_classes, self.n_features))
+        base_rotations = SpecialOrthogonal(n=self.n_features).random_gaussian(
+            gs.eye(self.n_features), 1, n_samples=self.n_classes)
+        var_eigenvalues = gs.random.uniform(.04, .06, (self.n_classes, self.n_features))
+        var_rotations = gs.random.uniform(.25, .75, (self.n_classes))
+        # var_rotations = gs.random.uniform(.009, .011, (self.n_classes))
 
         # data
-        mu = gs.zeros((self.n_classes * self.n_samples, self.n_features))
         cov = gs.zeros(
             (self.n_classes *
              self.n_samples,
@@ -66,19 +56,26 @@ class DatasetSPD_2D():
              self.n_features))
         Y = gs.zeros((self.n_classes * self.n_samples, self.n_classes))
         for i in range(self.n_classes):
-            means = gs.random.multivariate_normal(
-                M[i], var_mean, self.n_samples)
-            covs = gs.random.multivariate_normal(
-                S[i], var_cov, self.n_samples)
-            # rots = self.random_rotations(R[i], var_rot)
-            rots = so.random_gaussian(R[i], var_rot, n_samples=self.n_samples)
-            mu[i * self.n_samples:(i + 1) * self.n_samples] = means
-            for j in range(self.n_samples):
-                c = gs.diag(gs.abs(covs[j]))
-                c = gs.dot(rots[j], gs.dot(c, rots[j].T))
-                cov[i * self.n_samples + j] = c
+            # cov[i * self.n_samples:(i+1) * self.n_samples] = self.make_data_noisy(
+            #     base_rotations[i],gs.diag(mean_covariance_eigenvalues[i]),var_rotations[i],var_eigenvalues[i])
+            cov[i * self.n_samples:(i+1) * self.n_samples] = self.make_data(
+                base_rotations[i],gs.diag(mean_covariance_eigenvalues[i]),var_rotations[i])
             Y[i * self.n_samples:(i + 1) * self.n_samples, i] = 1
         return cov, Y
+
+    def make_data(self, eigenspace, eigenvalues, var):
+        spd=SPDMatrices(n=self.n_features)
+        spd.set_eigensummary(eigenspace,eigenvalues)
+        spd_data = spd.random_gaussian(
+            var_rotations=var, n_samples=self.n_samples)
+        return spd_data
+
+    def make_data_noisy(self,eigenspace, eigenvalues, var, var_eigenvalues):
+        spd=SPDMatrices(n=self.n_features)
+        spd.set_eigensummary(eigenspace,eigenvalues)
+        spd_data = spd.random_gaussian_noisy(
+            var_rotations=var, noise=var_eigenvalues, n_samples=self.n_samples)
+        return spd_data
 
 
 class DataHelper():

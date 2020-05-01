@@ -47,11 +47,11 @@ def main():
 
     for i in range(data_test.shape[0]):
         c = list(predictions[i] == 1).index(True)
-        x_from, y_from = ellipsis.draw(
-            data_test[i], color=ellipsis.colors[c], linewidth=5)
-        _, _, x_to, y_to = ellipsis.compute_coordinates(MDMEstimator.G[c])
-        arrow=visualization.DataArrow(ellipsis.fig)
-        arrow.draw(x_from, y_from, x_to, y_to)
+        # x_from, y_from = ellipsis.draw(
+        #     data_test[i], color=ellipsis.colors[c], linewidth=5)
+        # _, _, x_to, y_to = ellipsis.compute_coordinates(MDMEstimator.G[c])
+        # arrow=visualization.DataArrow(ellipsis.fig)
+        # arrow.draw(x_from, y_from, x_to, y_to)
 
     ellipsis.plot()
 
