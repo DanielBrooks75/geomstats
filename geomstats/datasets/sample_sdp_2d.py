@@ -45,7 +45,7 @@ class DatasetSPD_2D():
         base_rotations = SpecialOrthogonal(n=self.n_features).random_gaussian(
             gs.eye(self.n_features), 1, n_samples=self.n_classes)
         var_eigenvalues = gs.random.uniform(.04, .06, (self.n_classes, self.n_features))
-        var_rotations = gs.random.uniform(.25, .75, (self.n_classes))
+        var_rotations = gs.random.uniform(.5, .75, (self.n_classes))
         # var_rotations = gs.random.uniform(.009, .011, (self.n_classes))
 
         # data
