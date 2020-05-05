@@ -1,16 +1,15 @@
-"""
-Illustration example for the MDM classification algorithm in dimension 2
-"""
+"""Illustration example for the MDM classification algorithm in dimension 2."""
 
 
+import geomstats.datasets.sample_sdp_2d
+import geomstats.visualization as visualization
 from geomstats.geometry.spd_matrices import SPDMatrices
 from geomstats.geometry.spd_matrices import SPDMetricAffine
 from geomstats.learning.mdm import RiemannianMinimumDistanceToMeanClassifier
-import geomstats.visualization as visualization
-import geomstats.datasets.sample_sdp_2d
 
 
 def main():
+    """Execute illustration of MDM supervised classifier."""
     n_samples = 100
     n_features = 2
     n_classes = 3
@@ -50,7 +49,7 @@ def main():
         x_from, y_from = ellipsis.draw(
             data_test[i], color=ellipsis.colors[c], linewidth=5)
         _, _, x_to, y_to = ellipsis.compute_coordinates(MDMEstimator.G[c])
-        arrow=visualization.DataArrow(ellipsis.fig)
+        arrow = visualization.DataArrow(ellipsis.fig)
         arrow.draw(x_from, y_from, x_to, y_to)
 
     ellipsis.plot()

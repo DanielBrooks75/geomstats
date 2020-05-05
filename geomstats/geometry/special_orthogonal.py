@@ -88,7 +88,8 @@ class _SpecialOrthogonalMatrices(GeneralLinear, LieGroup):
         :param r: array-like, shape=[n, n]: rotation
         :return: float: angle of rotation
         """
-        assert (self.n == 2), 'This function was only tested for n==2, do not use otherwise.'
+        assert (self.n == 2),\
+            'This function was only tested for n==2, do not use otherwise.'
         return gs.arctan(r[0][1] / r[0][0])
 
     def divide_angle_of_cov2(self, r, alpha):
@@ -99,7 +100,8 @@ class _SpecialOrthogonalMatrices(GeneralLinear, LieGroup):
         :param alpha: float: scalar to divide of angle by
         :return: array-like, shape=[n, n]: rotation with divided angle
         """
-        assert (self.n == 2), 'This function was only tested for n==2, do not use otherwise.'
+        assert (self.n == 2),\
+            'This function was only tested for n==2, do not use otherwise.'
         angle = self.angle_of_rot2(r) * alpha
         c, s = gs.cos(angle), gs.sin(angle)
         return gs.array([[c, -s], [s, c]])
@@ -107,6 +109,7 @@ class _SpecialOrthogonalMatrices(GeneralLinear, LieGroup):
     def random_gaussian(self, mean, var, n_samples=1):
         """
         Emulate a Gaussian distribution in SO(n).
+
         WARNING: This was only tested and may be viable only in SO(2).
 
         :param mean: array-like, shape=[n, n]
@@ -117,10 +120,11 @@ class _SpecialOrthogonalMatrices(GeneralLinear, LieGroup):
         :param n_samples: int, number of samples
         :return: rot_gaussian: array-like, shape=[n_samples, n, n]
         """
-        assert (self.n == 2), 'This function was only tested for n==2, do not use otherwise.'
+        assert (self.n == 2),\
+            'This function was only tested for n==2, do not use otherwise.'
         rot_uniform = self.random_uniform(n_samples)
-        rot_normalized = gs.array([self.divide_angle_of_cov2(rot_uniform[i], var)
-                          for i in range(rot_uniform.shape[0])])
+        rot_normalized = gs.array([self.divide_angle_of_cov2(
+            rot_uniform[i], var) for i in range(rot_uniform.shape[0])])
         rot_gaussian = gs.matmul(mean, rot_normalized)
         return rot_gaussian
 
